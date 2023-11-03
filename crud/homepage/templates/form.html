@@ -1,0 +1,48 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Details</title>
+    <link rel="stylesheet" href="{% static 'Form.css' %}">
+    <script src="{% static 'form.js' %}"></script>
+    <script src="{% static 'getCookie.js' %}"></script>
+</head>
+<body>
+    <div class="sec_1">
+        <img src="https://www.divum.in/images/logo/Divum_Logo%20shade.png" alt="Divum Logo">
+        <h1>User Details</h1>
+        <h1></h1>
+    </div>
+    <div>
+        <form method="POST" action="{% url 'save_user' %}">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ user.email }}">
+            <label>Email ID:</label>
+            <input placeholder="Email ID" type="email" name="email" id="EmailID" required value="{{ user.email }}" onblur="validateEmail()">
+            <label class="error" id="emailerror"></label>
+            <br>
+            <label>First Name:</label>
+            <input placeholder="First Name" type="text" name="firstname" id="FirstName" onblur="validateFirstName()" required value="{{ user.firstname }}">
+            <label class="error" id="FirstNameerror"></label>
+            <br>
+            <label>Last Name:</label>
+            <input placeholder="Last Name" type="text" name="lastname" id="LastName" onblur="validateLastName()" required value="{{ user.lastname }}">
+            <label class="error" id="LastNameerror"></label>
+            <br>
+            <label>Mobile Number:</label>
+            <input placeholder="Mobile Number" type="number" name="phone" id="MobileNumber" onblur="validateMobileNumber()" required value="{{ user.phone }}">
+            <label class="error" id="moberror"></label>
+            <br>
+            <label>Date of Birth:</label>
+            <input placeholder="Date of Birth" type="date" name="dob" id="DOB" onblur="validateDateOfBirth()" required value="{{ user.dob }}">
+            <label class="error" id="doberror"></label>
+            <br>
+            <label>Address:</label>
+            <textarea placeholder="Address" name="address" id="Address" rows="2" cols="20" required>{{ user.address }}</textarea>
+            <br>
+            <input type="submit" value="Save">
+        </form>
+    </div>
+</body>
+</html>

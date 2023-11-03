@@ -1,0 +1,54 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRUD</title>
+    <link rel="stylesheet" href="{% static 'Home.css' %}">
+</head>
+<body>
+    <div class="sec_1">
+        <img src="https://www.divum.in/images/logo/Divum_Logo%20shade.png" alt="Divum Logo">
+        <h1>Registered Users</h1>
+        <a href="{% url 'add_user' %}">Add User</a>
+    </div>
+    <div class="sec_2">
+        <table id="UserDetails">
+            <thead>
+                <tr>
+                    <th>Email ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Mobile Number</th>
+                    <th>Date of Birth</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in data %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.firstname }}</td>
+                    <td>{{ user.lastname }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{{ user.dob }}</td>
+                    <td>{{ user.address }}</td>
+                    <td class="ed"><a href="{% url 'edit_user' user.email %}">Edit</a> | <a href="{% url 'delete_user' user.email %}">Delete</a></td>
+                </tr>
+                {% endfor %}
+             </tbody>                 
+        </table>
+        <br>
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="?page={{ page|add:'-1' }}" class="prev">Previous</a>
+            {% endif %}
+            
+            {% if data|length == 10 %}
+                <a href="?page={{ page|add:'1' }}" class="next">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
