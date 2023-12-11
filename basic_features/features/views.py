@@ -97,11 +97,11 @@ def login(request):
 # Logout api the token scope must be ended for that user once after logout.
 def logout(request):
     try:
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            token = auth_header.split(' ')[1]
-        else:
-            return JsonResponse({'error' : 'Authorization Header missing'}, status = 400)
+        # if 'Authorization' in request.headers:
+        #     auth_header = request.headers['Authorization']
+        #     token = auth_header.split(' ')[1]
+        # else:
+        #     return JsonResponse({'error' : 'Authorization Header missing'}, status = 400)
         return JsonResponse({'message': 'Logged out successfully'})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -109,60 +109,56 @@ def logout(request):
 # Get User profile
 def user_profile(request):
     try:
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            token = auth_header.split(' ')[1]
+        # if 'Authorization' in request.headers:
+        #     auth_header = request.headers['Authorization']
+        #     token = auth_header.split(' ')[1]
+        # else:
+        #     return JsonResponse({'error' : 'Authorization Header missing'}, status = 400)
+        # decoded_data = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=["HS256"])
+        # email = decoded_data['email']
+        if hasattr(request, 'email'):
+            user = User.objects.get(email=request.email)
+            data = {
+                'email' : user.email,
+                'fname' : user.firstname,
+                'lname' : user.lastname,
+                'mob' : int(user.phone),
+                'dob' : user.dob,
+            }
+            return JsonResponse(data, status=200)
         else:
-            return JsonResponse({'error' : 'Authorization Header missing'}, status = 400)
-        decoded_data = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=["HS256"])
-        email = decoded_data['email']
-        user = User.objects.get(email=email)
-        data = {
-            'email' : user.email,
-            'fname' : user.firstname,
-            'lname' : user.lastname,
-            'mob' : int(user.phone),
-            'dob' : user.dob,
-        }
-        return JsonResponse(data, status=200)
+            return JsonResponse({'error' : 'No email found'}, status=400)
     except Exception as e:
         return JsonResponse({'error' : str(e)}, status=500)
 
 # Update user profile
 def update_user(request):
     try:
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            token = auth_header.split(' ')[1]
-        else:
-            return JsonResponse({'error' : 'Authorization Header missing'}, status = 400)
-        decoded_data = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=["HS256"])
-        email = decoded_data['email']
-        user = User.objects.get(email=email)
-        if request.method == 'POST':
-            user_data = json.loads(request.body)
-            fname = user_data.get('firstname')
-            lname = user_data.get('lastname')
-            mob = int(user_data.get('phone'))
-            dob = user_data.get('dob')
+        # if 'Authorization' in request.headers:
+        #     auth_header = request.headers['Authorization']
+        #     token = auth_header.split(' ')[1]
+        # else:
+        #     return JsonResponse({'error' : 'Authorization Header missing'}, status = 400)
+        # decoded_data = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=["HS256"])
+        # email = decoded_data['email']
+        if hasattr(request, 'email'):
+            user = User.objects.get(email=request.email)
+            if request.method == 'POST':
+                user_data = json.loads(request.body)
+                fname = user_data.get('firstname')
+                lname = user_data.get('lastname')
+                mob = int(user_data.get('phone'))
+                dob = user_data.get('dob')
 
-            user.firstname = fname
-            user.lastname = lname
-            user.phone = mob
-            user.dob = dob
-            user.save()
-            return JsonResponse({'message': 'User data changed successfully'})
+                user.firstname = fname
+                user.lastname = lname
+                user.phone = mob
+                user.dob = dob
+                user.save()
+                return JsonResponse({'message': 'User data changed successfully'})
+            else:
+                return JsonResponse({'error': 'Method Not Allowed'}, status=405)
         else:
-            return JsonResponse({'error': 'Method Not Allowed'}, status=405)
+            return JsonResponse({'error' : 'No email found'}, status=400)
     except Exception as e:
         return JsonResponse({'error' : str(e)}, status=500)
-
-# Every 10 minutes once a event must be generated to all the users by sending the email, about some offers
-def ad(request):
-    try:
-        return 1
-    except Exception as e:
-        return JsonResponse({'error' : str(e)}, status=500)
-
-# Caching mechanism and about Redis cache
-# Middleware validation using MiddlewareMixin class

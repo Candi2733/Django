@@ -173,7 +173,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '/home/devum/Documents/Candi/Website/Django/basic_features/logs/app.log',  
+            'filename': '/home/devum/Documents/Candi/Website/Django/Django/basic_features/logs/app.log',  
         },
     },
     'loggers': {
