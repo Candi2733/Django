@@ -8,6 +8,7 @@ from .models import User
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.mail import send_mail 
 from django.template.response import TemplateResponse
+from django.core.cache import cache
 import logging
 
 logger = logging.getLogger(__name__)
@@ -102,6 +103,8 @@ def logout(request):
         #     token = auth_header.split(' ')[1]
         # else:
         #     return JsonResponse({'error' : 'Authorization Header missing'}, status = 400)
+        cache.clear()
+        print("Cache data cleared successfully")
         return JsonResponse({'message': 'Logged out successfully'})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -117,7 +120,16 @@ def user_profile(request):
         # decoded_data = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=["HS256"])
         # email = decoded_data['email']
         if hasattr(request, 'email'):
-            user = User.objects.get(email=request.email)
+            if cache.get(request.email):
+                user = cache.get(request.email)
+                print("Data from cache")
+            else:
+                try:
+                    user = User.objects.get(email=request.email)
+                    cache.set(request.email, user)
+                    print("Data from DB")
+                except Exception as e:
+                    return JsonResponse({'error' : str(e)}, status=500)  
             data = {
                 'email' : user.email,
                 'fname' : user.firstname,

@@ -23,12 +23,12 @@ class JWTAuthenticationMiddleware:
             if 'Authorization' in request.headers:
                 auth_header = request.headers['Authorization']
                 token = auth_header.split(' ')[1]
-                print(token)
+                # print(token)
             else:
                 return JsonResponse({'error': 'Authorization Header missing'}, status=400)
             
             decoded_data = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=["HS256"])
-            print(decoded_data)
+            # print(decoded_data)
             # if datetime.fromtimestamp(decoded_data['exp']) < datetime.utcnow():
             #     print(1)
             #     return JsonResponse({'error': 'Token has expired'}, status=401)
