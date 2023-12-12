@@ -70,6 +70,7 @@ def greetings_mail(email):
 
 # Login with email and passowrd, after successful verfication a JWT token must be generated.    
 def login(request):
+    cache.clear()
     try:
         if request.method == 'POST':
             user_data = json.loads(request.body)
