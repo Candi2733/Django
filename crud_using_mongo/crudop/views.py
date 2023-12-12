@@ -23,11 +23,10 @@ def employee(request):
             try:
                 employee_data=JSONParser().parse(request)
                 employees_serializer=EmployeeSerializer(data=employee_data)
-                print(employees_serializer)
                 if employees_serializer.is_valid():
                     employees_serializer.save()
                     return JsonResponse({"message": "Added Successfully"}, safe = False, status = 200)
-                return JsonResponse({"message" : employees_serializer.errors}, status=400)
+                return JsonResponse(employees_serializer.errors, status=400)
             except Exception as e:
                 return JsonResponse({'error': str(e)}, status = 400)
 
@@ -76,11 +75,10 @@ def department(request):
             try:
                 department_data=JSONParser().parse(request)
                 department_serializer=DepartmentSerializer(data=department_data)
-                print(department_serializer)
                 if department_serializer.is_valid():
                     department_serializer.save()
                     return JsonResponse({"messae" : "Added Successfully"}, safe = False, status = 200)
-                return JsonResponse({"message" : department_serializer}.errors, status=400)
+                return JsonResponse(department_serializer.errors, status=400)
             except Exception as e:
                 return JsonResponse({'error': str(e)}, status = 400)
 
