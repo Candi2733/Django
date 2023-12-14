@@ -5,6 +5,7 @@ import requests
 from django.http.response import JsonResponse
 import httpx
 
+# # Synchronous way of uploading the file
 # def push_files_to_api(api_endpoint, source_folder):
 #     try:
 #         files = os.listdir(source_folder)
@@ -32,6 +33,7 @@ async def upload_file(session, file_name, url):
         response = await session.post(url, files=files)
         return response.status_code
 
+# Uploading all files asynchronously
 async def main(files_to_upload,upload_url):
     files = os.listdir(files_to_upload)
     files_list = []
