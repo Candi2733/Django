@@ -1,8 +1,9 @@
 import json
 from django.http.response import JsonResponse
 from .models import Outlet, Delivery
-from .serializers import OutletSerializer, DeliverySerializer
+from .serializers import OutletSerializer
 from django.contrib.gis.geos import Point, GEOSGeometry
+from .functions import check_if_delivery, check_nearby_outlet
 
 # Create your views here.
 def index(request):
@@ -55,8 +56,17 @@ def get_delivery_details(request):
         if request.method == 'GET':
             try:
                 deliveries = Delivery.objects.all()
-                delivery = DeliverySerializer(deliveries, many = True)
-                return JsonResponse(delivery.data, safe = False, status = 200)
+                data = []
+                for deli in deliveries:
+                    delivery = {
+                        "delivery_id" : deli.delivery_id,
+                        "is_polygon" : deli.is_polygon,
+                        "polygon_area" : json.loads(deli.polygon_area.geojson),
+                        "radius" : deli.radius,
+                        "outlet_id" : deli.outlet.outlet_id
+                    }
+                    data.append(delivery)
+                return JsonResponse(data, safe = False, status = 200)
             except Exception as e:
                 return JsonResponse({'error' : str(e)}, status = 400)
         elif request.method == 'POST':
@@ -79,7 +89,6 @@ def get_delivery_details(request):
                             is_polygon = is_polygon,
                             polygon_area = polygon,
                             outlet = Outlet.objects.get(outlet_id=outlet_id),
-                            radius = radius
                         )
                     else:
                         delivery = Delivery.objects.create(
@@ -95,5 +104,75 @@ def get_delivery_details(request):
             except Exception as e:
                 return JsonResponse({'error' : str(e)}, status = 400)
         return JsonResponse({'error' : 'Method not allowed'}, status = 400)
+    except Exception as e:
+        return JsonResponse({'error' : str(e)}, status = 400)
+    
+def check_area_under_outlet(request):
+    try:
+        if request.method == 'POST':
+            data = json.loads(request.body)
+            point_x = data.get('lat')
+            point_y = data.get('long')
+            point = Point(point_x, point_y, srid=4326)
+            outlets = Outlet.objects.filter(area_covered__contains = point)
+            data = []
+            for out in outlets:
+                outlet = {
+                            "outlet_id" : out.outlet_id
+                        }
+                data.append(outlet)
+            return JsonResponse(data, safe= False, status = 200)
+        else:
+            return JsonResponse({'error' : 'Method not allowed'}, status = 400)
+    except Exception as e:
+        return JsonResponse({'error' : str(e)}, status = 400)
+    
+def check_area_under_delivery(request):
+    try:
+        if request.method == 'POST':
+            data = json.loads(request.body)
+            point_x = data.get('lat')
+            point_y = data.get('long')
+            point = Point(point_x, point_y, srid=4326)
+            deliveries = Delivery.objects.filter(polygon_area__contains = point)
+            data = []
+            for deli in deliveries:
+                delivery = {
+                            "delivery_id" : deli.delivery_id,
+                            "outlet_id" : deli.outlet.outlet_id
+                        }
+                data.append(delivery)
+            return JsonResponse(data, safe= False, status = 200)
+        else:
+            return JsonResponse({'error' : 'Method not allowed'}, status = 400)
+    except Exception as e:
+        return JsonResponse({'error' : str(e)}, status = 400)
+    
+def delivery_possible(request):
+    try:
+        if request.method == 'POST':
+            data = json.loads(request.body)
+            point_x = data.get('lat')
+            point_y = data.get('long')
+            point = Point(point_x, point_y, srid=4326)
+            is_delivery_possible = check_if_delivery(point)
+            # print(is_delivery_possible, 'sfusiiiiiiiiiiiiiii')
+            if is_delivery_possible:
+                delivery_details = Delivery.objects.filter(delivery_id = is_delivery_possible).first()
+                delivery = {
+                        "delivery_id" : delivery_details.delivery_id,
+                        "is_polygon" : delivery_details.is_polygon,
+                        "polygon_area" : json.loads(delivery_details.polygon_area.geojson),
+                        "radius" : delivery_details.radius,
+                        "outlet_id" : delivery_details.outlet.outlet_id,
+                        "outlet_name" : delivery_details.outlet.name,
+                        "location" : str(delivery_details.outlet.lat) + str(delivery_details.outlet.long),
+                    }
+                return JsonResponse(delivery, safe=False, status = 200)
+            else:
+                is_outlet_nearby = check_nearby_outlet(point)
+                return is_outlet_nearby
+        else:
+            return JsonResponse({'error' : 'Method not allowed'}, status = 400)
     except Exception as e:
         return JsonResponse({'error' : str(e)}, status = 400)

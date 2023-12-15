@@ -20,7 +20,7 @@ class Outlet(BaseModel):
 class Delivery(BaseModel):
     delivery_id = models.IntegerField(unique = True)
     is_polygon = models.BooleanField()
-    polygon_area = models.PolygonField()
-    radius = models.IntegerField()
+    polygon_area = models.PolygonField(null = True)
+    radius = models.IntegerField(null = True)
     outlet = models.ForeignKey('Outlet', on_delete = models.CASCADE)
-    
+    is_active = models.BooleanField(default = 1)
